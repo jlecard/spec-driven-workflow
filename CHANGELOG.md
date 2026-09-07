@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/jlecard/spec-driven-workflow/compare/v1.0.0...v1.1.0) (2026-09-07)
+
+
+### Features
+
+* initial release of the spec-driven-workflow CLI ([6d50abe](https://github.com/jlecard/spec-driven-workflow/commit/6d50abea8d3a20e887fbd15ecc4b96166d37ec4e))
+
 # 1.0.0 (2026-09-07)
 
 
