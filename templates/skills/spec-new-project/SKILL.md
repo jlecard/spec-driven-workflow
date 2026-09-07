@@ -18,9 +18,12 @@ nothing to check it against yet."
 
 Right after `spec-driven-workflow init` has scaffolded `specs/` into an
 empty or near-empty project, and the user is ready to start describing
-what they're building. Don't run this on a project that already has a
-filled-in `specs/product/` and `specs/requirements/initial_requirements.md`
-— at that point just use `spec-driven-development` for new work.
+what they're building. If `init`'s output said specs location is
+"external (not yet configured)," run `spec-location-setup` first --
+this skill needs `specs/` to actually exist. Don't run this on a
+project that already has a filled-in `specs/product/` and
+`specs/requirements/initial_requirements.md` — at that point just use
+`spec-driven-development` for new work.
 
 ## Step 1: Interview for the product spec
 

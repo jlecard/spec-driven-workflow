@@ -12,6 +12,8 @@ Options for "init":
   --dir <path>            Target project directory (default: current directory)
   --mode <new|existing>   Skip auto-detection of new vs. existing project
   --agents <list>         Comma-separated: claude,copilot (default: both)
+  --specs-location <in-repo|external>   Where specs live (default: in-repo)
+  --specs-dir <name>      Specs folder name when in-repo (default: specs)
   --yes, -y               Non-interactive: accept defaults / detected values
   --force                 Overwrite files that already exist
 
@@ -19,6 +21,8 @@ Examples:
   npx spec-driven-workflow init
   npx spec-driven-workflow init --agents=copilot --mode=existing
   npx spec-driven-workflow init --yes
+  npx spec-driven-workflow init --specs-dir=documentation --yes
+  npx spec-driven-workflow init --specs-location=external --yes
 `;
 
 function parseArgs(argv) {

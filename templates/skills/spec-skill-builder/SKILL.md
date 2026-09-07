@@ -92,7 +92,7 @@ relative path.
 
 ## Step 4: Install to the right location(s)
 
-Read `specs/.spec-workflow.json` for which agents this project is using
+Read `.spec-workflow.json` (repo root) for which agents this project is using
 (`agents: ["claude", "copilot"]` or a subset) and write the **identical**
 `SKILL.md` (and any bundled scripts) to each corresponding folder — the
 same content works unmodified in every location:

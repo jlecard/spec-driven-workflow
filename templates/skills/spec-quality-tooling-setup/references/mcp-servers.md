@@ -65,8 +65,8 @@ Ask, don't assume:
   recommending an install that will fail.
 - Is there a UI to test at all? Skip browser-automation servers
   entirely for a pure backend/CLI project.
-- What's the project's agent target (`specs/.spec-workflow.json`'s
-  `agents` field)? Install instructions differ (see below) --
+- What's the project's agent target (`.spec-workflow.json`'s, at the
+  repo root, `agents` field)? Install instructions differ (see below) --
   don't give VS Code steps to a Claude-Code-only project or vice versa.
 
 ## Installation instructions

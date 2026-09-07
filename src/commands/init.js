@@ -3,12 +3,13 @@
 const fs = require("fs");
 const path = require("path");
 
-const { select } = require("../lib/prompt");
-const { copyDir, writeFile, ensureDir } = require("../lib/fsUtils");
+const { select, ask } = require("../lib/prompt");
+const { copyDir, writeFile, ensureDir, replacePathPrefixInTree } = require("../lib/fsUtils");
 const { detectMode, alreadyInitialized } = require("../lib/detect");
 
 const TEMPLATES_DIR = path.join(__dirname, "..", "..", "templates");
 const ALL_SKILLS = [
+  "spec-location-setup",
   "spec-driven-development",
   "spec-driven-implementation",
   "spec-new-project",
@@ -59,7 +60,42 @@ async function resolveOptions(args) {
     }
   }
 
-  return { dir, mode, agents, force: Boolean(args.force) };
+  // Where specs live: a folder in this repo (single repo or monorepo -- same
+  // answer either way, just a directory name), or a separate, dedicated repo
+  // for a multi-repo/polyrepo workspace. The latter needs `gh`/git judgment
+  // calls (existing vs. new repo, submodule wiring) better done by the agent
+  // in-chat -- see the spec-location-setup skill -- so this only collects the
+  // simple in-repo case here and defers the rest.
+  let specsLocation = args["specs-location"];
+  let specsDir = args["specs-dir"];
+  if (!specsLocation) {
+    if (nonInteractive) {
+      specsLocation = "in-repo";
+    } else {
+      specsLocation = await select(
+        "Where should specs live? in-repo (a folder here) or external (a separate, dedicated repo)?",
+        ["in-repo", "external"],
+        "in-repo"
+      );
+    }
+  }
+  if (specsLocation === "in-repo" && !specsDir) {
+    if (nonInteractive) {
+      specsDir = "specs";
+    } else {
+      const answer = await ask('What should the specs directory be called? (default "specs"): ');
+      specsDir = answer || "specs";
+    }
+  }
+
+  return {
+    dir,
+    mode,
+    agents,
+    specsLocation,
+    specsDir: specsLocation === "in-repo" ? specsDir : null,
+    force: Boolean(args.force),
+  };
 }
 
 function skillTargetDirs(dir, agents) {
@@ -76,27 +112,23 @@ function installSkill(skillName, targetDirs, force, log) {
   }
 }
 
-function scaffoldSpecsFolders(dir, mode, force, log) {
-  const specsDir = path.join(dir, "specs");
-  copyDir(path.join(TEMPLATES_DIR, "specs"), specsDir, { force, log });
+function scaffoldSpecsFolders(dir, specsDir, force, log) {
+  const specsPath = path.join(dir, specsDir);
+  copyDir(path.join(TEMPLATES_DIR, "specs"), specsPath, { force, log });
 
   for (const type of ["product", "requirements", "design", "validation", "lightweight"]) {
-    ensureDir(path.join(specsDir, type));
-  }
-
-  if (mode === "new") {
-    // A brand-new project starts with no baseline at all -- spec-new-project
-    // creates it through an interview. Nothing else to seed here.
-    return;
+    ensureDir(path.join(specsPath, type));
   }
 }
 
 function writeConfig(dir, options, log) {
-  const configPath = path.join(dir, "specs", ".spec-workflow.json");
+  const configPath = path.join(dir, ".spec-workflow.json");
   const config = {
     version: 1,
     mode: options.mode,
     agents: options.agents,
+    specsLocation: options.specsLocation,
+    specsDir: options.specsDir,
     createdAt: new Date().toISOString(),
   };
   writeFile(configPath, JSON.stringify(config, null, 2) + "\n", { force: true, log });
@@ -104,21 +136,32 @@ function writeConfig(dir, options, log) {
 
 async function init(args) {
   const options = await resolveOptions(args);
-  const { dir, mode, agents, force } = options;
+  const { dir, mode, agents, specsLocation, specsDir, force } = options;
 
   if (alreadyInitialized(dir) && !force) {
     process.stdout.write(
-      `specs/.spec-workflow.json already exists in ${dir} -- re-run with --force to overwrite files.\n`
+      `.spec-workflow.json already exists in ${dir} -- re-run with --force to overwrite files.\n`
     );
   }
 
   const log = [];
-  scaffoldSpecsFolders(dir, mode, force, log);
-
   const targetDirs = skillTargetDirs(dir, agents);
   for (const skillName of ALL_SKILLS) {
     installSkill(skillName, targetDirs, force, log);
   }
+
+  if (specsLocation === "in-repo") {
+    scaffoldSpecsFolders(dir, specsDir, force, log);
+    if (specsDir !== "specs") {
+      // Retarget every "specs/..." reference in the skills + specs templates
+      // we just installed to the custom folder name -- see fsUtils' own docs.
+      for (const targetRoot of targetDirs) replacePathPrefixInTree(targetRoot, "specs", specsDir);
+      replacePathPrefixInTree(path.join(dir, specsDir), "specs", specsDir);
+    }
+  }
+  // specsLocation === "external": nothing scaffolded locally yet -- the
+  // spec-location-setup skill picks an existing/new dedicated repo, mounts
+  // it as a submodule, and does this same retargeting once that path is known.
 
   writeConfig(dir, options, log);
 
@@ -134,7 +177,23 @@ async function init(args) {
   );
 
   process.stdout.write("Agents enabled: " + agents.join(", ") + "\n");
-  process.stdout.write("Mode: " + mode + "\n\n");
+  process.stdout.write("Mode: " + mode + "\n");
+  process.stdout.write(
+    "Specs location: " +
+      (specsLocation === "in-repo" ? `${specsDir}/ (this repo)` : "external (not yet configured)") +
+      "\n\n"
+  );
+
+  if (specsLocation === "external") {
+    process.stdout.write(
+      "Next step: open this project in Claude or GitHub Copilot Chat and say\n" +
+        '  "set up the specs repository"\n' +
+        "to run the spec-location-setup skill -- it picks an existing or new dedicated\n" +
+        "GitHub repo, mounts it as a submodule, and finishes wiring every skill to it.\n" +
+        "Run spec-new-project/spec-discovery after that, once specs/ actually exists.\n"
+    );
+    return;
+  }
 
   if (mode === "new") {
     process.stdout.write(
@@ -157,7 +216,7 @@ async function init(args) {
       "GitHub or GitLab issues, if this project uses either.\n" +
       "Say \"set up quality tooling\" to run spec-quality-tooling-setup -- it recommends\n" +
       "lint/coverage/security/testing tools and MCP servers, and records the agreed gates\n" +
-      "in specs/QUALITY_GATES.md so every spec and spec-driven-implementation enforce them.\n"
+      `in ${specsDir}/QUALITY_GATES.md so every spec and spec-driven-implementation enforce them.\n`
   );
 }
 

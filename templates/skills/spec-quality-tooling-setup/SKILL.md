@@ -84,7 +84,7 @@ Install: <the exact command(s), from references/language-tooling.md>
 
 Do the same for MCP servers worth adding (from
 `references/mcp-servers.md`), tailored to which agent(s) this project
-targets (`specs/.spec-workflow.json`'s `agents` field) and to whatever
+targets (`.spec-workflow.json`'s (repo root) `agents` field) and to whatever
 the user says about their local environment (OS, whether Docker/network
 access is available for a server that needs it) — ask rather than
 assume when a server's install path depends on it.

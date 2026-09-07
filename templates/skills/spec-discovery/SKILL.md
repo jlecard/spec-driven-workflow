@@ -24,7 +24,9 @@ project that already has real code, and no baseline exists yet
 template placeholder). Runs once per project, typically. Re-running
 later to refresh the baseline against a codebase that's drifted a lot
 since is fine, but treat that as a deliberate, explicit ask, not
-something to redo automatically.
+something to redo automatically. If `init`'s output said specs location
+is "external (not yet configured)," run `spec-location-setup` first --
+this skill needs `specs/` to actually exist.
 
 ## Step 1: Explore the workspace
 

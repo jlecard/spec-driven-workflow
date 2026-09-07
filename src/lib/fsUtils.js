@@ -34,4 +34,27 @@ function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
-module.exports = { copyDir, writeFile, ensureDir };
+/**
+ * Rewrites every text file under `rootDir` (recursively), replacing
+ * whole-path-segment occurrences of `oldName/` with `newName/` -- used to
+ * retarget every "specs/..." reference in installed skills/templates when
+ * the user picks a non-default specs directory name.
+ */
+function replacePathPrefixInTree(rootDir, oldName, newName) {
+  if (oldName === newName) return;
+  const pattern = new RegExp(`\\b${oldName}/`, "g");
+  const replacement = `${newName}/`;
+  for (const entry of fs.readdirSync(rootDir, { withFileTypes: true })) {
+    const entryPath = path.join(rootDir, entry.name);
+    if (entry.isDirectory()) {
+      replacePathPrefixInTree(entryPath, oldName, newName);
+      continue;
+    }
+    if (!/\.(md|json|py)$/.test(entry.name)) continue;
+    const content = fs.readFileSync(entryPath, "utf8");
+    const updated = content.replace(pattern, replacement);
+    if (updated !== content) fs.writeFileSync(entryPath, updated, "utf8");
+  }
+}
+
+module.exports = { copyDir, writeFile, ensureDir, replacePathPrefixInTree };

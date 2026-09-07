@@ -30,7 +30,7 @@ function detectMode(dir) {
 }
 
 function alreadyInitialized(dir) {
-  return fs.existsSync(path.join(dir, "specs", ".spec-workflow.json"));
+  return fs.existsSync(path.join(dir, ".spec-workflow.json"));
 }
 
 module.exports = { detectMode, alreadyInitialized };

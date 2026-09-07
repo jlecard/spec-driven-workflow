@@ -3,12 +3,19 @@
 How specs work in this repo. Read this once; individual specs shouldn't
 need to repeat it.
 
+This project's specs live under `specs/` -- either a folder in this
+same repository, or (if `.spec-workflow.json` at the repo root says
+`"specsLocation": "external"`) a separate git repository mounted at
+that path as a submodule. Either way, every path below is written
+relative to wherever `specs/` actually resolves to; see
+`spec-location-setup` if this hasn't been configured yet or needs to
+change.
+
 ## Structure: grouped by concern, not by feature
 
 ```text
 specs/
   CONSTITUTION.md
-  .spec-workflow.json                # written by the CLI, records setup choices
   product/
     <slug>.md                        # normally just one, the whole product
   requirements/

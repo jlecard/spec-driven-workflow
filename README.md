@@ -18,38 +18,58 @@ existing codebase). It will ask:
 - **New project or existing codebase?** (auto-detected, confirm or
   override)
 - **Which agent(s)?** Claude, GitHub Copilot, or both
+- **Where should specs live?** A folder in this repo (single repo or
+  monorepo -- you pick the folder name, default `specs`), or a separate,
+  dedicated repository for a multi-repo/polyrepo workspace (finished via
+  the `spec-location-setup` skill after install, since picking an
+  existing/new GitHub repo needs a live `gh` conversation).
 
 Non-interactive / scripted use:
 
 ```bash
 npx spec-driven-workflow init --mode=new --agents=both --yes
 npx spec-driven-workflow init --mode=existing --agents=copilot --yes
+npx spec-driven-workflow init --specs-dir=documentation --yes
+npx spec-driven-workflow init --specs-location=external --yes
 ```
 
-| Flag | Meaning |
-|---|---|
-| `--dir <path>` | Target directory (default: current directory) |
-| `--mode <new\|existing>` | Skip auto-detection |
-| `--agents <list>` | `claude`, `copilot`, or `both` (default: both) |
-| `--yes` / `-y` | Non-interactive: accept detected/default values |
-| `--force` | Overwrite files that already exist |
+| Flag                      | Meaning                                              |
+| ------------------------- | ---------------------------------------------------- |
+| `--dir <path>`          | Target directory (default: current directory)        |
+| `--mode <new\|existing>` | Skip auto-detection                                  |
+| `--agents <list>`       | `claude`, `copilot`, or `both` (default: both) |
+| `--specs-location <in-repo\|external>` | Where specs live (default: `in-repo`) |
+| `--specs-dir <name>`    | Specs folder name when in-repo (default: `specs`) |
+| `--yes` / `-y`        | Non-interactive: accept detected/default values      |
+| `--force`               | Overwrite files that already exist                   |
 
 ## What gets created
 
 ```text
-specs/
+<specs-dir>/                 # "specs" by default -- your chosen name otherwise
   CONSTITUTION.md            # the rules: folder structure, spec types, status flow
   QUALITY_GATES.md           # lint/coverage/security/test commands per language (spec-quality-tooling-setup fills this in)
-  .spec-workflow.json        # records the choices made at init time
   _templates/                # product / requirements / design / validation / lightweight
   product/  requirements/  design/  validation/  lightweight/
 
+.spec-workflow.json           # repo root -- records the choices made at init time
 .claude/skills/<name>/SKILL.md   # if Claude was selected
 .github/skills/<name>/SKILL.md   # if Copilot was selected (same SKILL.md format)
 ```
 
+Every installed skill's own `specs/...` references are automatically
+retargeted at install time if you picked a non-default folder name --
+there's nothing to fix up by hand.
+
 Skills installed:
 
+- **`spec-location-setup`** -- determines whether this workspace is a
+  single repo, a monorepo, or part of a multi-repo/polyrepo setup, and
+  finishes configuring where specs live accordingly: a named folder
+  here, or a dedicated separate GitHub repository (existing or new)
+  mounted as a git submodule. Runs first if `init` deferred this choice
+  (specs location: external), or any time you want to rename the folder
+  or move specs to/from a dedicated repo later.
 - **`spec-driven-development`** -- gates new feature/behavior-change/
   bug-fix work on an approved spec existing first.
 - **`spec-driven-implementation`** -- takes one approved requirement
@@ -90,6 +110,12 @@ say:
 - New project: **"let's start this project"** (runs `spec-new-project`)
 - Existing codebase: **"discover specs for this codebase"** (runs
   `spec-discovery`)
+
+If you chose a separate specs repository, say **"set up the specs
+repository"** first to run `spec-location-setup` -- it picks an
+existing or new dedicated GitHub repo, mounts it as a submodule, and
+retargets every skill to it before the two steps above have anything
+to work with.
 
 Then say **"customize the spec workflow for this project"** to run
 `spec-project-customization` -- a one-time-ish pass that looks at what
