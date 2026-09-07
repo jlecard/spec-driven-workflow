@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Verify the packed tarball installs and runs
+        shell: bash
+        run: |
+          npm pack
+          tarball=$(ls spec-driven-workflow-*.tgz)
+          npm install -g "$tarball"
+          mkdir -p "$RUNNER_TEMP/smoke-test"
+          spec-driven-workflow init --dir "$RUNNER_TEMP/smoke-test" --mode=new --agents=both --yes
+          test -f "$RUNNER_TEMP/smoke-test/specs/CONSTITUTION.md"

@@ -1,0 +1,37 @@
+{
+  "name": "spec-driven-workflow",
+  "version": "0.1.0",
+  "description": "Portable spec-driven development workflow: scaffolds specs/ and agent skills (Claude + GitHub Copilot) into a new or existing project.",
+  "license": "MIT",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jlecard/spec-driven-workflow.git"
+  },
+  "homepage": "https://github.com/jlecard/spec-driven-workflow#readme",
+  "bugs": {
+    "url": "https://github.com/jlecard/spec-driven-workflow/issues"
+  },
+  "bin": {
+    "spec-driven-workflow": "bin/spec-driven-workflow.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "keywords": [
+    "spec-driven-development",
+    "claude",
+    "github-copilot",
+    "cli",
+    "scaffolding"
+  ]
+}
