@@ -15,6 +15,9 @@
   "bin": {
     "spec-driven-workflow": "bin/spec-driven-workflow.js"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "bin",
     "src",
