@@ -8,3 +8,9 @@ Thumbs.db
 .vscode/PythonImportHelper-v2-Completion.json
 .env
 npm_recovery_codes.txt
+
+# Output from running this repo's own CLI against itself (dogfooding/testing) --
+# not the package's source templates, which live under templates/.
+/.claude/
+/.github/skills/
+/specs/
