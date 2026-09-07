@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/jlecard/spec-driven-workflow/compare/v1.1.1...v1.2.0) (2026-09-07)
+
+
+### Features
+
+* configurable specs location (in-repo folder name or dedicated repo) ([a7e88e0](https://github.com/jlecard/spec-driven-workflow/commit/a7e88e0264cf76dc9b93c495a638599d938f4a05))
+
 ## [1.1.1](https://github.com/jlecard/spec-driven-workflow/compare/v1.1.0...v1.1.1) (2026-09-07)
 
 
