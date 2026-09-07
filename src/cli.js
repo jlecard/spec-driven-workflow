@@ -23,7 +23,8 @@ Examples:
 
 function parseArgs(argv) {
   const args = { _: [] };
-  for (const raw of argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const raw = argv[i];
     if (raw === "-y") {
       args.yes = true;
       continue;
@@ -33,10 +34,19 @@ function parseArgs(argv) {
       continue;
     }
     const eq = raw.indexOf("=");
-    if (eq === -1) {
-      args[raw.slice(2)] = true;
-    } else {
+    if (eq !== -1) {
       args[raw.slice(2, eq)] = raw.slice(eq + 1);
+      continue;
+    }
+    const name = raw.slice(2);
+    const next = argv[i + 1];
+    // `--flag value` (space-separated) counts as this flag's value unless
+    // the next token is itself another flag, in which case this one is boolean.
+    if (next !== undefined && !next.startsWith("--")) {
+      args[name] = next;
+      i++;
+    } else {
+      args[name] = true;
     }
   }
   return args;
