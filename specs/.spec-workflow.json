@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "mode": "existing",
+  "agents": [
+    "claude",
+    "copilot"
+  ],
+  "createdAt": "2026-09-07T05:58:26.434Z"
+}
