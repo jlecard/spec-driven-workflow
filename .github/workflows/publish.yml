@@ -1,5 +1,8 @@
 name: Publish
 
+# release.yml already publishes via semantic-release inline (a tag pushed with
+# GITHUB_TOKEN can't re-trigger this listener). This exists as a manual
+# fallback (workflow_dispatch against a tag ref) and for a human-pushed tag.
 on:
   push:
     tags:
@@ -27,7 +30,6 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Verify this tag points at a commit on main
-        if: github.event_name == 'push'
         run: |
           git fetch origin main --quiet
           if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
@@ -35,7 +37,6 @@ jobs:
             exit 1
           fi
       - name: Verify package.json version matches the tag
-        if: github.event_name == 'push'
         run: |
           tag="${GITHUB_REF_NAME#v}"
           pkg="$(node -p "require('./package.json').version")"
