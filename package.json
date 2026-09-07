@@ -1,6 +1,6 @@
 {
   "name": "spec-driven-workflow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Portable spec-driven development workflow: scaffolds specs/ and agent skills (Claude + GitHub Copilot) into a new or existing project.",
   "license": "MIT",
   "type": "commonjs",
